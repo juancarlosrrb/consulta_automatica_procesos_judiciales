@@ -6,8 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Seguimiento Consulta Automática Procesos Judiciales Colombia</title>
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-	<link rel="stylesheet" href="css/styles.css">
-	<!-- En las siguientes 3líneas (3 links) lo que se hizo fue agregar el font de google; es para que la letra de la página web se vea más bonita
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+	<!-- <link rel="stylesheet" href="css/styles.css">
+	En las siguientes 3líneas (3 links) lo que se hizo fue agregar el font de google; es para que la letra de la página web se vea más bonita
 	-->
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -103,9 +104,15 @@
 	
 	<h2>Contáctanos</h2>
 	<p>correo: datajuancahb@gmail.com </p>
-	  <!-- jQuery (Bootstrap JS plugins depend on it) -->
-  <script src="js/jquery-3.7.1.min.js"></script>
-  <script src="js/bootstrap.min.js"></script>
-  <script src="js/script.js"></script>
+	  <!-- jQuery (Bootstrap JS plugins depend on it) 
+	    <script src="js/jquery-3.7.1.min.js"></script>
+		  <script src="js/bootstrap.min.js"></script>
+		  <script src="js/script.js"></script>
+		-->
+
+  	<script src="{{ url_for('static', filename='js/jquery-3.7.1.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
 </body>
 </html>
