@@ -19,8 +19,8 @@ from io import BytesIO
 
 
 app = Flask(__name__, 
-            static_folder='frontend/static',  # Configura la carpeta estática
-            template_folder='frontend/templates')
+            static_folder='../frontend/static',  # Configura la carpeta estática
+            template_folder='../frontend/templates')
 
 @app.route('/')
 def index():
