@@ -9,7 +9,7 @@ Created on Tue Dec 17 12:14:22 2024
 import random
 import smtplib
 from email.mime.text import MIMEText
-from flask import Flask, request, jsonify, send_file, render_template
+from flask import Flask, request, jsonify, send_file
 import os
 from flask_cors import CORS  # Importa CORS
 import pandas as pd
@@ -22,9 +22,7 @@ app = Flask(__name__,
             static_folder='site/static',  # Configura la carpeta estática
             template_folder='site/templates')
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+CORS(app)  # Habilita CORS para todas las rutas
 
 # Función para leer el archivo de credenciales y verificar si el correo existe
 path_data_base = "C:/Users/USUARIO/Juan Carlos/Software San Francisco de Asis/pagina_web/consulta_automatica_procesos_judiciales/back_end/data_base"
