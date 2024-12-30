@@ -1,0 +1,31 @@
+#nombre-usuario {
+    color: #6A4F4B; /* Marrón suave para texto */
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.btn-cerrar-sesion {
+    background-color: #C0C0C0; /* Verde suave */
+    color: #8B4513; /* Marrón */
+    border: none;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.btn-cerrar-sesion:hover {
+    background-color: #C0C0C0;; /* Verde ligeramente más oscuro */
+    color: white; /* Texto blanco para contraste */
+}
+
+.custom-width {
+  max-width: 350px; /* Ajusta el ancho máximo de la sección */
+  word-wrap: break-word; /* Ajusta el texto para que no desborde */
+  white-space: normal; /* Permite que el texto ocupe varias líneas */
+}
+
+.info_procesos_no_encontrados {
+  margin-top: 20px; /* Ajusta el valor según el espacio que desees */
+  font-size: 13px; /* Reduce un poco el tamaño del texto si es necesario */
+  text-align: justify; /* Opcional: Alinear el texto de forma justificada */
+}
+

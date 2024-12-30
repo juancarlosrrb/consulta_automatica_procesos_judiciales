@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba Local</title>
+</head>
+<body>
+    <form id="login-form">
+        <input type="text" id="mail_username" placeholder="Correo" required>
+        <input type="password" id="password_sfa" placeholder="Contraseña" required>
+        <button type="submit">Enviar</button>
+    </form>
+
+    <p id="mensaje"></p>
+
+    <script>
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const correo = document.getElementById('mail_username').value;
+            const password = document.getElementById('password_sfa').value;
+
+            try {
+                const respuesta = await fetch('http://127.0.0.1:5000/correo_login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mail_username: correo, password_sfa: password })
+                });
+
+                const data = await respuesta.json();
+                if (respuesta.ok) {
+                    document.getElementById('mensaje').innerText = `Respuesta: ${data.mensaje}`;
+                } else {
+                    document.getElementById('mensaje').innerText = 'Error en el servidor';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('mensaje').innerText = 'Error al conectar con el servidor';
+            }
+        });
+    </script>
+</body>
+</html>

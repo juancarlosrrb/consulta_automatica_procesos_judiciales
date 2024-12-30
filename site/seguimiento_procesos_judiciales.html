@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Seguimiento</title>
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+	<link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/styles_dashboard.css">
+	<!-- En las siguientes 3líneas (3 links) lo que se hizo fue agregar el font de google; es para que la letra de la página web se vea más bonita
+	-->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&family=Oxygen:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+<!-- comentar multiples lines
+	vamos poco a poco Dios mediante
+-->
+<body class = "seguimiento_page">
+
+
+    <script src="js/jquery-3.7.1.min.js"></script>
+
+		<header>
+		  <nav id="header-nav" class="navbar navbar-default">
+		    <div class="container d-flex align-items-center">
+		      <!-- Logo a la izquierda -->
+		      <a href="index.html" class="d-flex align-items-center text-decoration-none">
+		        <div id="logo-img" class="me-3"></div> <!-- Imagen del logo -->
+		        <h1 class="mb-0">Software San Francisco de Asís</h1> <!-- Título al lado del logo -->
+		      </a>
+
+
+      <!-- Nombre del usuario y botón de cerrar sesión -->
+          <div class="text-end">
+            <p id="nombre-usuario" class="mb-1">Bienvenido, <span id="usuario-correo">Usuario</span></p>
+            <button onclick="cerrarSesion()" class="btn btn-cerrar-sesion btn-sm">Cerrar sesión</button>
+          </div>
+      	</div>
+		  </nav>
+    </header>
+
+  <div class="container-fluid">
+    <header class="py-3 text-center">
+      <h1 class="text-primary">Seguimiento de Procesos Judiciales</h1>
+    </header>
+
+    <main class="d-flex">
+      <!-- Sección izquierda: opciones -->
+      <div class="left-panel p-3 border-end">
+        <h3 class="text-secondary">Agregar Procesos</h3>
+        <form id="radicado-form" class="mb-3">
+          <div class="mb-2">
+            <label for="radicado" class="form-label">Agregar Número de Radicado</label>
+            <input type="text" id="numero_radicado" class="form-control" placeholder="Ej: 12345">
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <button type="button" class="btn btn-primary w-100 me-2" onclick="agregar_numero_radicado()">Agregar</button>
+            <button type="button" class="btn btn-danger w-100" onclick= "eliminar_numero_radicado()">Eliminar</button>
+          </div>
+          <button type="button" class="btn btn-secondary w-100" onclick= "buscar_n_radicado()">Buscar</button>
+        </form>
+
+        <p id="mensaje_agregar"></p>
+
+        <br>
+        <br>
+
+      <div class="left-panel p-3 border-end">
+            <h3 class="text-secondary">Cargar Archivo de Radicados</h3>
+            <input type="file" id="archivoRadicados" class="form-control" accept=".txt">
+            <button id="cargarBtn" class="btn btn-primary mt-3" onclick="cargar_varios_procesos()">Cargar Procesos</button>
+            <div id="mensaje-estado" class="mt-2 text-secondary"></div>
+      </div>
+
+
+      </div>
+
+
+
+      
+
+      <!-- Sección central: lista       -->
+
+      <!-- Sección central: lista de procesos -->
+      <div class="middle-panel p-3 flex-grow-1">
+          <h3 class="text-secondary text-center">Lista de Procesos</h3>
+            <label for="radicado" class="form-label">A continuación se ven los número de radicados cargados:</label>
+          <!-- Tabla para mostrar los procesos -->
+          <table class="table table-bordered">
+              <thead>
+                  <tr>
+                      <th scope="col">N° Radicado</th>
+                  </tr>
+              </thead>
+              <tbody id="tabla-procesos">
+                  <!-- Los procesos se insertarán aquí dinámicamente -->
+              </tbody>
+          </table>
+      </div>
+
+      <!-- Sección derecha: descarga -->
+      <div class="right-panel p-3 border-start custom-width">
+        <h3 class="text-secondary">Archivo</h3>
+        <div class="d-flex flex-column align-items-center">
+          <p>Descarga el Excel con los procesos consultados:</p>
+        <div class="text-center mt-4">
+            <button id="descargarBtn" class="btn btn-primary" onclick="generar_reporte_excel()">Descargar Excel</button>
+            <p class = "info_procesos_no_encontrados">Si hay procesos en la pestaña "procesos NO_BUSCADOS" es porque se buscó la ciudad y entidad_o_espcialidad y no se encontraron estos campos en la página web azul. Por favor envía número_radicado, ciudad y entidad_o_juzgado al correo datajuancahb@gmail.com para agregar al seguimiento de tus procesos</p>
+            <div id="spinner" class="spinner-border text-primary d-none" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p id="mensaje-estado" class="mt-2 text-secondary"></p>
+
+        </div>
+      </div>
+              </div>
+
+
+
+
+    </main>
+  </div>
+
+  <h5>Contáctanos</h5>
+  <p>correo: datajuancahb@gmail.com</p>
+
+	<!-- Información de contacto-->
+	<!-- Información de contacto-->
+	<!-- Información de contacto 
+	
+  <script src="js/script.js"></script>
+
+	  jQuery (Bootstrap JS plugins depend on it) -->
+	  
+  <script src="js/jquery-3.7.1.min.js"></script>
+  <script src="js/script_dashboard.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  
+</body>
+</html>

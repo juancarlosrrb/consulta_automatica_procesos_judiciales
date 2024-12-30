@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Ingreso y Registros Consulta Automática Procesos Judiciales Colombia</title>
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+	<link rel="stylesheet" href="css/styles.css">
+	<!-- En las siguientes 3líneas (3 links) lo que se hizo fue agregar el font de google; es para que la letra de la página web se vea más bonita
+	-->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&family=Oxygen:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+<!-- comentar multiples lines
+	vamos poco a poco Dios mediante
+-->
+<body class = "login_page">
+	<header>
+  <nav id="header-nav" class="navbar navbar-default">
+    <div class="container d-flex align-items-center">
+      <!-- Logo a la izquierda -->
+      <a href="index.html" class="d-flex align-items-center text-decoration-none">
+        <div id="logo-img" class="me-3"></div> <!-- Imagen del logo -->
+        <h1 class="mb-0">Software San Francisco de Asís</h1> <!-- Título al lado del logo -->
+      </a>
+    </div>
+  </nav>
+</header>
+
+	<!-- Ingreso a la plataforma-->
+
+	<h2 class="text-left titulo_ingreso_plataforma">Ingreso plataforma</h2>
+	  <div class="container d-flex justify-content-center align-items-center">
+	    <div class="login-container">
+	      <h2 class="text-center mb-4">Ingreso a la Plataforma</h2>
+
+	      <!-- Formulario de Login -->
+	      <form id="login-form">
+	        <div class="mb-3">
+	          <label for="username" class="form-label">Correo</label>
+	          <input type="text" class="form-control" id="correo_login" placeholder="Ingresa tu correo" required>
+	        </div>
+	        
+	        <div class="mb-3">
+	          <label for="password" class="form-label">Contraseña</label>
+	          <input type="password" class="form-control" id="password_login" placeholder="Ingresa tu contraseña" required>
+	        </div>
+	        
+	        <button type="submit" class="btn btn-primary w-100">Ingresar</button>
+	      </form>
+	    </div>
+	  </div>
+
+	<br>
+	<br>
+	<!-- Registro a la plataforma-->
+
+	<h1>Registro</h1>
+	<p>Si no tienes usuario y contraseña, por favor registrate con correo electrónico</p>
+	<br>
+	<br>
+
+
+		<div class="container d-flex justify-content-center align-items-center">
+		    <div class="login-container">
+		        <h2 class="text-center mb-4">Registro a la Plataforma</h2>
+
+		        <!-- Formulario de registro -->
+		        <form id="registro-form">
+		            <div class="mb-3">
+		                <label for="username" class="form-label">Correo</label>
+		                <input type="text" class="form-control" id="username_registro" placeholder="Ingresa tu correo" required>
+		            </div>
+		            
+		            <div class="mb-3">
+		                <label for="password" class="form-label">Contraseña</label>
+		                <input type="password" class="form-control" id="password_registro" placeholder="Ingresa tu contraseña" required>
+		                <div class="form-check">
+		                    <input class="form-check-input" type="checkbox" id="mostrar_password">
+		                    <label class="form-check-label" for="mostrar_password">Mostrar Contraseña</label>
+		                </div>
+		            </div>
+		             
+
+		            <div class="mb-3">
+		                <label for="password" class="form-label">Confirmar Contraseña</label>
+		                <input type="password" class="form-control" id="password_confirmacion_registro" placeholder="Confirma tu contraseña" required>
+		                <div class="form-check">
+		                    <input class="form-check-input" type="checkbox" id="mostrar_confirmacion_password">
+		                    <label class="form-check-label" for="mostrar_confirmacion_password">Mostrar Contraseña</label>
+		                </div>
+		            </div>
+
+		            <button type="submit" class="btn btn-primary w-100">RegistrarMe</button>
+
+				<p>La contraseña debe tener al menos 8 caracteres, incluir mayúsculas, minúsculas, números y caracteres especiales.</p>
+
+
+		        <p id="mensaje"></p>
+		        </form>
+
+		        <!-- Campo para ingresar el token, inicialmente oculto -->
+		        <div id="token-div" style="display:none;">
+		            <label for="token" class="form-label">Ingrese el token enviado</label>
+		            <input type="text" class="form-control" id="token_input" placeholder="Ingresa el token">
+		            <button type="button" class="btn btn-success" onclick="verificar_codigo()">Verificar Código</button>
+		        </div>
+
+		        <p id="mensaje_exitoso"></p>
+		        
+		    </div>
+		</div>
+
+
+
+		<!-- Botón ingresar-->
+
+
+	<!-- Información de contacto-->
+	<!-- Información de contacto-->
+	<!-- Información de contacto-->
+	
+	<h2>Contáctanos</h2>
+	<p>correo: datajuancahb@gmail.com</p>
+	  <!-- jQuery (Bootstrap JS plugins depend on it) -->
+  <script src="js/jquery-3.7.1.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/script_confianzudo.js"></script>
+
+</body>
+</html>

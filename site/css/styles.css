@@ -1,0 +1,57 @@
+body {
+	font-size: 16px;
+	color: #8B4513;
+	background-color: #87CEEB;	
+	font-family: Oxygen;
+}
+
+
+body.login_page {
+	font-size: 16px;
+	color: #8B4513;
+	background-color: #EAF8E0;	
+	font-family: Oxygen;
+}
+
+
+body.seguimiento_page {
+	background: linear-gradient(to bottom, #e0f7fa, #a7ffeb);
+  	font-family: Arial, sans-serif;
+}
+
+/** HEADER **/
+#header-nav {
+  background-color: #f6b319;
+  border-radius: 0;
+  border: 0;
+}
+
+#logo-img {
+  background: url('../images/logo_software_san_francisco_de_asis.jpeg') no-repeat;
+  width: 150px;
+  height: 150px;
+  margin: 10px 15px 10px 0;
+  background-size: contain;
+}
+
+/* Estilo personalizado para el título */
+.welcome-title {
+      font-weight: bold; /* Negrita */
+      font-size: 3rem; /* Tamaño grande */
+      color: #8B4513; /* Azul llamativo */
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2); /* Sombras para resaltar */
+}
+
+.login-container {
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      background-color: #f8f9fa;
+}
+
+
+.titulo_ingreso_plataforma  {
+      margin-bottom: 50px
+}
