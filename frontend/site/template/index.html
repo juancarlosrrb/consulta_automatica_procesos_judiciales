@@ -24,7 +24,6 @@
       <!-- Logo a la izquierda -->
       <a href="index.html" class="d-flex align-items-center text-decoration-none">
         <div id="logo-img" class="me-3"></div> <!-- Imagen del logo -->
-        <img src="{{ url_for('static', filename='images/logo_software_san_francisco_de_asis.jpeg') }}" alt="Logo">
         <h1 class="mb-0">Software San Francisco de Asís</h1> <!-- Título al lado del logo -->
       </a>
     </div>
@@ -91,7 +90,8 @@
 
 	    <!-- Imagen para Log In debajo del título -->
 	    <div class="text-center">
-	        <img src="images/login-icon.png" alt="Log In" width="200" height="200" class="img-fluid"> <!-- Cambia login-icon.png por tu imagen -->
+	    	<img src="{{ url_for('static', filename='images/login-icon.png') }}" alt="Log In" width="200" height="200" class="img-fluid">
+	        <!-- <img src="images/login-icon.png" alt="Log In" width="200" height="200" class="img-fluid">  Cambia login-icon.png por tu imagen -->
       	<p class="mt-2">Haz clic en el ícono para iniciar sesión</p>
        </a>
 
