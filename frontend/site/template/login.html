@@ -5,9 +5,13 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Ingreso y Registros Consulta Automática Procesos Judiciales Colombia</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
+	<!-- 
 	<link rel="stylesheet" href="css/bootstrap.min.css">
 	<link rel="stylesheet" href="css/styles.css">
-	<!-- En las siguientes 3líneas (3 links) lo que se hizo fue agregar el font de google; es para que la letra de la página web se vea más bonita
+	En las siguientes 3líneas (3 links) lo que se hizo fue agregar el font de google; es para que la letra de la página web se vea más bonita
 	-->
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,8 +24,11 @@
 	<header>
   <nav id="header-nav" class="navbar navbar-default">
     <div class="container d-flex align-items-center">
-      <!-- Logo a la izquierda -->
+      <!-- Logo a la izquierda 
       <a href="index.html" class="d-flex align-items-center text-decoration-none">
+      -->
+      <a href="{{ url_for('index') }}" class="d-flex align-items-center text-decoration-none">
+
         <div id="logo-img" class="me-3"></div> <!-- Imagen del logo -->
         <h1 class="mb-0">Software San Francisco de Asís</h1> <!-- Título al lado del logo -->
       </a>
@@ -124,10 +131,15 @@
 	
 	<h2>Contáctanos</h2>
 	<p>correo: datajuancahb@gmail.com</p>
-	  <!-- jQuery (Bootstrap JS plugins depend on it) -->
-  <script src="js/jquery-3.7.1.min.js"></script>
-  <script src="js/bootstrap.min.js"></script>
-  <script src="js/script_confianzudo.js"></script>
+	  <!-- jQuery (Bootstrap JS plugins depend on it) 
+	    <script src="js/jquery-3.7.1.min.js"></script>
+		  <script src="js/bootstrap.min.js"></script>
+		  <script src="js/script_confianzudo.js"></script>
+		-->
+   	<script src="{{ url_for('static', filename='js/jquery-3.7.1.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='js/script_confianzudo.js') }}"></script>
+
 
 </body>
 </html>
