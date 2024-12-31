@@ -26,6 +26,10 @@ app = Flask(__name__,
 def index():
     return render_template('index.html')
 
+@app.route('/login')
+def login():
+    return render_template('login.html')
+
 # Función para leer el archivo de credenciales y verificar si el correo existe
 path_data_base = "C:/Users/USUARIO/Juan Carlos/Software San Francisco de Asis/pagina_web/consulta_automatica_procesos_judiciales/back_end/data_base"
 path_df_token = os.path.join(path_data_base, "1token.txt")
