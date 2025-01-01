@@ -16,6 +16,7 @@ import pandas as pd
 from datetime import datetime
 import subprocess
 from io import BytesIO
+import sqlalchemy 
 from sqlalchemy import create_engine, Table, Column, MetaData, String
 
 
@@ -177,24 +178,38 @@ def correo_registrar():
     return jsonify({'mensaje': 'Correo enviado con el código de verificación. Por favor, ingresa el código de 4 dígitos enviado a tu correo.'})
 
 
-def eliminar_token(correo, path_df_token):
-    # Cargar el archivo token.txt en un DataFrame
-    try:
-        df_tokens = pd.read_csv(path_df_token, sep='|', header=None, names=['correo', 'codigo'])
-    except FileNotFoundError:
-        print('Archivo token.txt no encontrado.')
-        return
+def eliminar_token(correo, engine, table_name_tokens):
+    """
+    Elimina un token asociado a un correo en la tabla de PostgreSQL.
 
-    # Filtrar las filas que no contienen el correo que queremos eliminar
-    df_tokens_filtrado = df_tokens[df_tokens['correo'] != correo]
+    Args:
+        correo (str): Correo electrónico del usuario cuyo token se eliminará.
+        engine: Objeto SQLAlchemy Engine conectado a la base de datos.
+        table_name_tokens (str): Nombre de la tabla en PostgreSQL.
+    
+    Returns:
+        None
+    """
+    # Conectar a la base de datos
+    with engine.connect() as connection:
+        # Leer la tabla en un DataFrame
+        df_tokens = pd.read_sql_table(table_name_tokens, con=connection)
 
-    # Verificar si hay cambios (si no hay coincidencia, no se hace nada)
-    if len(df_tokens_filtrado) == len(df_tokens):
-        print("El correo no se encuentra en el archivo.")
-        return
+        # Verificar si el correo existe en la tabla
+        if correo not in df_tokens['correo'].values:
+            print("El correo no se encuentra en la tabla.")
+            return
 
-    # Sobrescribir el archivo token.txt con las filas filtradas
-    df_tokens_filtrado.to_csv(path_df_token, sep='|', header=False, index=False)
+        # Filtrar las filas que no contienen el correo que queremos eliminar
+        df_tokens_filtrado = df_tokens[df_tokens['correo'] != correo]
+
+        # Sobrescribir la tabla con las filas filtradas
+        df_tokens_filtrado.to_sql(
+            table_name_tokens,
+            con=engine,
+            if_exists='replace',
+            index=False
+        )
 
     print(f"Token con correo {correo} eliminado correctamente.")
 
