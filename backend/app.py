@@ -18,7 +18,7 @@ import subprocess
 from io import BytesIO
 import sqlalchemy 
 from sqlalchemy import create_engine, Table, Column, MetaData, String
-
+import psycopg2
 
 app = Flask(__name__, 
             static_folder='../frontend/site/static',  # Configura la carpeta estática
@@ -214,7 +214,6 @@ def eliminar_token(correo, engine, table_name_tokens):
     print(f"Token con correo {correo} eliminado correctamente.")
 
 # Función para verificar el código ingresado
-
 @app.route('/verificar_codigo', methods=['POST'])
 def verificar_codigo():
     data = request.json
@@ -223,33 +222,43 @@ def verificar_codigo():
     codigo_ingresado = data.get('codigo_ingresado')
     fecha_hora_registro = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-
     print('Correo recibido:', mail_username)
     print('Contraseña recibida:', password_sfa)
     print('Codigo ingresado:', codigo_ingresado)
 
-    # Cargar el archivo token.txt en un DataFrame
     try:
-        df_tokens = pd.read_csv(path_df_token, sep='|', header=None, names=['correo', 'codigo'])
-    except FileNotFoundError:
-        return jsonify({'mensaje': 'Archivo de tokens no encontrado.'})
+        # Cargar la tabla de tokens en un DataFrame
+        with engine.connect() as connection:
+            df_tokens = pd.read_sql_table('table_name_tokens', con=connection)
+    except Exception as e:
+        return jsonify({'mensaje': f'Error al acceder a la tabla de tokens: {str(e)}'})
 
     # Verificar si el correo y el código coinciden
-    
     user_token = df_tokens[df_tokens['correo'] == mail_username]['codigo'].values
 
     if len(user_token) > 0 and str(user_token[0]) == str(codigo_ingresado):
-        # Si el código es correcto, agregar el correo y la contraseña al archivo credentials_db.txt
-        with open(path_df_credentials , 'a') as f:
-            f.write(f'{mail_username}|{password_sfa}|{fecha_hora_registro}\n')
-            
-            #eliminar el código de tokens de ese usuario
-            eliminar_token(correo = mail_username, path_df_token = path_df_token)
-        return jsonify({'mensaje': 'Registro exitoso, puedes iniciar sesión ahora.'})
-    
+        try:
+            # Agregar el correo y la contraseña a la tabla de credenciales
+            with engine.connect() as connection:
+                new_entry = pd.DataFrame({
+                    'correo': [mail_username],
+                    'password': [password_sfa],
+                    'fecha_hora_registro': [fecha_hora_registro]
+                })
+                new_entry.to_sql('table_name_credentials', con=connection, if_exists='append', index=False)
+
+            # Eliminar el token del usuario de la tabla de tokens
+            with engine.connect() as connection:
+                connection.execute(
+                    f"DELETE FROM table_name_tokens WHERE correo = '{mail_username}'"
+                )
+
+            return jsonify({'mensaje': 'Registro exitoso, puedes iniciar sesión ahora.'})
+        except Exception as e:
+            return jsonify({'mensaje': f'Error al registrar el usuario: {str(e)}'})
+
     # Si no se encuentra el correo o el código no coincide
     return jsonify({'mensaje': 'El código es incorrecto. Intenta nuevamente.'})
-    #return jsonify({"token_enviado": "satisfactoriamente"})
 
 @app.route('/login', methods=['POST'])
 def correo_login():
