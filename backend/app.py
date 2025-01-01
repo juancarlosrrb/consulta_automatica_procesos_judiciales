@@ -240,7 +240,7 @@ def correo_login():
         # Verificar si las credenciales existen en la base de datos
         with engine.connect() as connection:
             # Buscar las credenciales del usuario
-            query = text("""
+            query = text(f"""
                 SELECT * FROM "{table_name_credentials}"
                 WHERE correo = :correo AND password = :password
             """)
@@ -249,7 +249,7 @@ def correo_login():
 
             if usuario_valido:
                 # Si las credenciales son válidas, agregar información del inicio de sesión a la base de datos
-                insert_query = text("""
+                insert_query = text(f"""
                     INSERT INTO "{table_name_ingreso_plataforma}" (correo, fecha_hora_ingreso)
                     VALUES (:correo, :fecha_hora_ingreso)
                 """)
