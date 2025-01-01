@@ -47,6 +47,7 @@ engine = create_engine(DATABASE_URL)
 
 table_name_credentials = "2credentials_db"
 table_name_tokens = "1token"
+table_name_ingreso_plataforma = "5ingreso_plataforma"
 #def verificar_correo(mail_username):
 #    
 #    if os.path.exists(path_df_credentials):
@@ -231,37 +232,38 @@ def correo_login():
     data = request.json
     mail_username = data.get('mail_username')
     password_sfa = data.get('password_sfa')
+    
     # Obtener la fecha y hora actual en el formato deseado
     fecha_hora_ingreso = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-
     try:
-        # Cargar los credenciales desde el archivo
-        df_credentials = pd.read_csv(path_df_credentials, sep='|')
+        # Verificar si las credenciales existen en la base de datos
+        with engine.connect() as connection:
+            # Buscar las credenciales del usuario
+            query = text("""
+                SELECT * FROM "{table_name_credentials}"
+                WHERE correo = :correo AND password = :password
+            """)
+            result = connection.execute(query, {"correo": mail_username, "password": password_sfa})
+            usuario_valido = result.fetchone()  # Obtener el primer resultado
 
-        # Verificar si existe un registro que coincida con correo y contraseña
-        usuario_valido = df_credentials[
-            (df_credentials['correo'] == mail_username) & 
-            (df_credentials['password'] == password_sfa)
-        ]
+            if usuario_valido:
+                # Si las credenciales son válidas, agregar información del inicio de sesión a la base de datos
+                insert_query = text("""
+                    INSERT INTO "{table_name_ingreso_plataforma}" (correo, fecha_hora_ingreso)
+                    VALUES (:correo, :fecha_hora_ingreso)
+                """)
+                connection.execute(insert_query, {"correo": mail_username, "fecha_hora_ingreso": fecha_hora_ingreso})
+                connection.commit()
+                # Credenciales válidas
+                return jsonify({'success': True, 'mensaje': 'Inicio de sesión exitoso.'})
 
+            else:
+                # Credenciales inválidas
+                return jsonify({'success': False, 'mensaje': 'Correo o contraseña incorrectos.'})
 
-        if not usuario_valido.empty:
-            #agregar info inicio de sesión
-            with open(path_df_ingreso , 'a') as f:
-                f.write(f'{mail_username}|{fecha_hora_ingreso}\n')
-            # Credenciales válidas
-            return jsonify({'success': True, 'mensaje': 'Inicio de sesión exitoso.'})
-            
-        else:
-            # Credenciales inválidas
-            return jsonify({'success': False, 'mensaje': 'Correo o contraseña incorrectos.'})
-
-    except FileNotFoundError:
-        return jsonify({'success': False, 'mensaje': 'Archivo de credenciales no encontrado.'})
     except Exception as e:
         return jsonify({'success': False, 'mensaje': f'Error: {str(e)}'})
-
 
 
 @app.route('/agregar_proceso', methods=['POST'])

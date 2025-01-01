@@ -146,7 +146,7 @@ async function verificar_codigo(correo) {
     
 
     try {
-        const respuesta = await fetch('http://127.0.0.1:5000/verificar_codigo', {
+        const respuesta = await fetch(`${base_url}/verificar_codigo`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ mail_username: correo_token, password_sfa: password_token, codigo_ingresado: codigo_ingresado })
@@ -181,7 +181,7 @@ async function correo_login(event1) {
 
 
     try {
-        const respuesta = await fetch('http://127.0.0.1:5000/login', {
+        const respuesta = await fetch(`${base_url}/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ mail_username: correo, password_sfa: password })
