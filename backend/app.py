@@ -16,6 +16,7 @@ import pandas as pd
 from datetime import datetime
 import subprocess
 from io import BytesIO
+from sqlalchemy import create_engine, Table, Column, MetaData, String
 
 
 app = Flask(__name__, 
@@ -30,13 +31,21 @@ def index():
 def login():
     return render_template('login.html')
 
-# Función para leer el archivo de credenciales y verificar si el correo existe
-path_data_base = "C:/Users/USUARIO/Juan Carlos/Software San Francisco de Asis/pagina_web/consulta_automatica_procesos_judiciales/back_end/data_base"
-path_df_token = os.path.join(path_data_base, "1token.txt")
-path_df_credentials = os.path.join(path_data_base, "2credentials_db.txt")
-path_df_ingreso = os.path.join(path_data_base, "5ingreso_plataforma.txt")
-path_archivo_procesos_por_cliente = os.path.join(path_data_base, "3procesos_por_cliente.txt")
+DATABASE_URL = "postgresql://db_san_francisco_asis_user:ypEDAt8FtqgFMfNbEuLJUCa3A7Amp9jG@dpg-ctpjl68gph6c73df3c3g-a.oregon-postgres.render.com/db_san_francisco_asis"
 
+# Crear el motor de SQLAlchemy
+engine = create_engine(DATABASE_URL)
+
+
+# Función para leer el archivo de credenciales y verificar si el correo existe
+#path_data_base = "C:/Users/USUARIO/Juan Carlos/Software San Francisco de Asis/pagina_web/consulta_automatica_procesos_judiciales/back_end/data_base"
+#path_df_token = os.path.join(path_data_base, "1token.txt")
+#path_df_credentials = os.path.join(path_data_base, "2credentials_db.txt")
+#path_df_ingreso = os.path.join(path_data_base, "5ingreso_plataforma.txt")
+#path_archivo_procesos_por_cliente = os.path.join(path_data_base, "3procesos_por_cliente.txt")
+
+table_name_credentials = "2credentials_db"
+table_name_tokens = "1token"
 #def verificar_correo(mail_username):
 #    
 #    if os.path.exists(path_df_credentials):
@@ -60,10 +69,11 @@ def verificar_correo(mail_username):
     Returns:
         bool: True si el correo está presente, False en caso contrario.
     """
-    if os.path.exists(path_df_credentials):
-        try:
+        
+    try:
             # Lee el archivo como un DataFrame con encabezados
-            df = pd.read_csv(path_df_credentials, sep='|')
+            with engine.connect() as connection:
+                df = pd.read_sql_table(table_name_credentials, con=connection)
             
             # Verifica si la columna 'correo' existe y si el correo está en ella
             if 'correo' in df.columns:
@@ -71,42 +81,51 @@ def verificar_correo(mail_username):
             else:
                 print("La columna 'correo' no se encuentra en el archivo.")
                 return False
-        except Exception as e:
+    except Exception as e:
             print(f"Error al leer o procesar el archivo: {e}")
             return False
-    else:
-        print(f"Archivo no encontrado: {path_df_credentials}")
-        return False
+
 
 
 # Función para generar un código de verificación de 4 dígitos
-def generar_codigo_verificacion(mail_username):
+def generar_codigo_verificacion(mail_username, engine, table_name_credentials):
+    """
+    Genera un código de verificación de 4 dígitos y lo guarda/actualiza en una tabla PostgreSQL.
+
+    Args:
+        mail_username (str): Correo electrónico del usuario.
+        engine: Objeto SQLAlchemy Engine conectado a la base de datos.
+        table_name_credentials (str): Nombre de la tabla en PostgreSQL.
+    
+    Returns:
+        str: Código de verificación generado.
+    """
     codigo_email = str(random.randint(1000, 9999))
 
-    # Abrir el archivo en modo lectura y escritura
-    with open(path_df_token, 'r+') as file:
-        lines = file.readlines()
-        file.seek(0)  # Volver al inicio del archivo
+    # Conectar a la base de datos
+    with engine.connect() as connection:
+        # Leer la tabla en un DataFrame
+        df = pd.read_sql_table(table_name_tokens, con=connection)
 
-        # Verificar si ya existe el correo en el archivo
-        found = False
-        for i, line in enumerate(lines):
-            correo, token = line.strip().split('|')
-            if correo == mail_username:
-                # Si el correo ya existe, sobrescribir con el nuevo token
-                lines[i] = f"{mail_username}|{codigo_email}\n"
-                found = True
-                break
-
-        if not found:
-            # Si el correo no se encontró, agregarlo al final del archivo
-            lines.append(f"{mail_username}|{codigo_email}\n")
-
-        # Escribir de nuevo todas las líneas en el archivo
-        file.writelines(lines)
+        # Verificar si el correo ya existe
+        if mail_username in df['correo'].values:
+            # Actualizar el token para el correo existente
+            query = f"""
+                UPDATE {table_name_tokens}
+                SET token = '{codigo_email}'
+                WHERE correo = '{mail_username}';
+            """
+        else:
+            # Insertar un nuevo registro para el correo
+            query = f"""
+                INSERT INTO {table_name_tokens} (correo, token)
+                VALUES ('{mail_username}', '{codigo_email}');
+            """
+        
+        # Ejecutar la consulta
+        connection.execute(query)
 
     return codigo_email
-    
 
 # Función para enviar el correo con el código
 def enviar_correo(mail_username, codigo):
