@@ -89,7 +89,7 @@ def verificar_correo(mail_username):
 
 
 # Función para generar un código de verificación de 4 dígitos
-def generar_codigo_verificacion(mail_username, engine, table_name_credentials):
+def generar_codigo_verificacion(mail_username):
     """
     Genera un código de verificación de 4 dígitos y lo guarda/actualiza en una tabla PostgreSQL.
 
