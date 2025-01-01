@@ -178,41 +178,6 @@ def correo_registrar():
     return jsonify({'mensaje': 'Correo enviado con el código de verificación. Por favor, ingresa el código de 4 dígitos enviado a tu correo.'})
 
 
-def eliminar_token(correo, engine, table_name_tokens):
-    """
-    Elimina un token asociado a un correo en la tabla de PostgreSQL.
-
-    Args:
-        correo (str): Correo electrónico del usuario cuyo token se eliminará.
-        engine: Objeto SQLAlchemy Engine conectado a la base de datos.
-        table_name_tokens (str): Nombre de la tabla en PostgreSQL.
-    
-    Returns:
-        None
-    """
-    # Conectar a la base de datos
-    with engine.connect() as connection:
-        # Leer la tabla en un DataFrame
-        df_tokens = pd.read_sql_table(table_name_tokens, con=connection)
-
-        # Verificar si el correo existe en la tabla
-        if correo not in df_tokens['correo'].values:
-            print("El correo no se encuentra en la tabla.")
-            return
-
-        # Filtrar las filas que no contienen el correo que queremos eliminar
-        df_tokens_filtrado = df_tokens[df_tokens['correo'] != correo]
-
-        # Sobrescribir la tabla con las filas filtradas
-        df_tokens_filtrado.to_sql(
-            table_name_tokens,
-            con=engine,
-            if_exists='replace',
-            index=False
-        )
-
-    print(f"Token con correo {correo} eliminado correctamente.")
-
 # Función para verificar el código ingresado
 @app.route('/verificar_codigo', methods=['POST'])
 def verificar_codigo():

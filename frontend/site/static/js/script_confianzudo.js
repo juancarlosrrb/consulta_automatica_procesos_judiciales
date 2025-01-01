@@ -102,7 +102,7 @@ async function enviar_registrar_usuario(correo, password) {
 
 
     try {
-        const respuesta = await fetch('http://127.0.0.1:5000/correo_registrar', {
+        const respuesta = await fetch('https://consulta-automatica-procesos-judiciales.onrender.com/correo_registrar', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ mail_username: correo, password_sfa: password })
