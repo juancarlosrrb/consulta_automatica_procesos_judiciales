@@ -32,6 +32,11 @@ def index():
 def login():
     return render_template('login.html')
 
+#@app.route('/login')
+#def login():
+#    return render_template('login.html')
+
+
 DATABASE_URL = "postgresql://db_san_francisco_asis_user:ypEDAt8FtqgFMfNbEuLJUCa3A7Amp9jG@dpg-ctpjl68gph6c73df3c3g-a.oregon-postgres.render.com/db_san_francisco_asis"
 
 # Crear el motor de SQLAlchemy
@@ -504,4 +509,4 @@ def upload_file_scraping():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)

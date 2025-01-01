@@ -1,9 +1,10 @@
 //comunicación front y backend
 
 //1. Registro
-const base_url = window.location.hostname === 'localhost' 
-    ? 'http://127.0.0.1:5000'  // Puerto local
-    : 'https://consulta-automatica-procesos-judiciales.onrender.com';  // URL de producción
+const base_url = 'https://3197-2803-f890-102-299-6c64-633f-eba6-eb04.ngrok-free.app'
+//const base_url = window.location.hostname === 'localhost' 
+    //? 'http://127.0.0.1:5000'  // Puerto local
+    //: 'https://consulta-automatica-procesos-judiciales.onrender.com';  // URL de producción
 
 
 // Función para mostrar/ocultar la contraseña principal
