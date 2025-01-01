@@ -17,7 +17,7 @@ from datetime import datetime
 import subprocess
 from io import BytesIO
 import sqlalchemy 
-from sqlalchemy import create_engine, Table, Column, MetaData, String
+from sqlalchemy import create_engine, Table, Column, MetaData, String, text
 import psycopg2
 
 app = Flask(__name__, 
@@ -111,20 +111,21 @@ def generar_codigo_verificacion(mail_username):
         # Verificar si el correo ya existe
         if mail_username in df['correo'].values:
             # Actualizar el token para el correo existente
-            query = f"""
-                UPDATE {table_name_tokens}
+            query = text(f"""
+                UPDATE "{table_name_tokens}"
                 SET token = '{codigo_email}'
                 WHERE correo = '{mail_username}';
-            """
+            """)
         else:
             # Insertar un nuevo registro para el correo
-            query = f"""
-                INSERT INTO {table_name_tokens} (correo, token)
-                VALUES ('{mail_username}', '{codigo_email}');
-            """
+            query = text(f"""
+                INSERT INTO "{table_name_tokens}" (correo, token)
+                VALUES (:correo, :token);
+            """)
         
         # Ejecutar la consulta
-        connection.execute(query)
+        connection.execute(query, {"correo": mail_username, "token": codigo_email})
+        connection.commit()
 
     return codigo_email
 
@@ -214,10 +215,10 @@ def verificar_codigo():
 
             # Eliminar el token del usuario de la tabla de tokens
             with engine.connect() as connection:
-                connection.execute(
-                    f"DELETE FROM table_name_tokens WHERE correo = '{mail_username}'"
-                )
-
+                query = text(f'DELETE FROM "{table_name_tokens}" WHERE correo = :correo')
+                connection.execute(query, {"correo": mail_username})
+                connection.commit()
+                
             return jsonify({'mensaje': 'Registro exitoso, puedes iniciar sesión ahora.'})
         except Exception as e:
             return jsonify({'mensaje': f'Error al registrar el usuario: {str(e)}'})
