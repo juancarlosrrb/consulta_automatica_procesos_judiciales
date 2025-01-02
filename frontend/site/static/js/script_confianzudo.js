@@ -197,7 +197,8 @@ async function correo_login(event1) {
             console.log(data)
             console.log(correo)
             // Redirigir al dashboard
-            //window.location.href = "seguimiento_procesos_judiciales.html";
+            // Redirigir usando la URL proporcionada por el backend
+            window.location.href = data.redirect_url;
         } else {
             alert(data.mensaje); // Mostrar mensaje de error
         }
