@@ -197,7 +197,7 @@ async function correo_login(event1) {
             console.log(data)
             console.log(correo)
             // Redirigir al dashboard
-            window.location.href = "seguimiento_procesos_judiciales.html";
+            //window.location.href = "seguimiento_procesos_judiciales.html";
         } else {
             alert(data.mensaje); // Mostrar mensaje de error
         }

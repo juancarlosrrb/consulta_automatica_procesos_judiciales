@@ -9,7 +9,7 @@ Created on Tue Dec 17 12:14:22 2024
 import random
 import smtplib
 from email.mime.text import MIMEText
-from flask import Flask, request, jsonify, send_file, render_template
+from flask import Flask, request, jsonify, send_file, render_template, redirect, url_for
 import os
 from flask_cors import CORS  # Importa CORS
 import pandas as pd
@@ -24,6 +24,9 @@ app = Flask(__name__,
             static_folder='../frontend/site/static',  # Configura la carpeta estática
             template_folder='../frontend/site/template')
 
+# Habilita CORS para todas las rutas
+CORS(app)
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -32,9 +35,9 @@ def index():
 def login():
     return render_template('login.html')
 
-#@app.route('/login')
-#def login():
-#    return render_template('login.html')
+@app.route('/seguimiento_procesos_judiciales')
+def seguimiento():
+    return render_template('seguimiento_procesos_judiciales.html')
 
 
 DATABASE_URL = "postgresql://db_san_francisco_asis_user:ypEDAt8FtqgFMfNbEuLJUCa3A7Amp9jG@dpg-ctpjl68gph6c73df3c3g-a.oregon-postgres.render.com/db_san_francisco_asis"
@@ -261,7 +264,9 @@ def correo_login():
                 connection.execute(insert_query, {"correo": mail_username, "fecha_hora_ingreso": fecha_hora_ingreso})
                 connection.commit()
                 # Credenciales válidas
-                return jsonify({'success': True, 'mensaje': 'Inicio de sesión exitoso.'})
+                #return jsonify({'success': True, 'mensaje': 'Inicio de sesión exitoso.'})
+                # Login exitoso, redirige al dashboard
+                return redirect(url_for('seguimiento'))  # Redirige a la ruta del seguimiento
 
             else:
                 # Credenciales inválidas
