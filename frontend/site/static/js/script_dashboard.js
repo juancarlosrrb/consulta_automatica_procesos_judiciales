@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function verificacion_logeo() {
 
-		const correo = sessionStorage.getItem("correo");
+		const correo = localStorage.getItem("correo"); // O sessionStorage
 
 	    console.log(correo);
 	    document.getElementById('usuario-correo').innerText = correo;
@@ -15,6 +15,8 @@ function verificacion_logeo() {
 	        // Si no hay un correo almacenado, redirigir a la página de login
 	        alert("Por favor, inicia sesión primero.");
 	        window.location.href = "login.html";
+            //<a href="{{ url_for('login') }}">
+
 	    } 
 }
 

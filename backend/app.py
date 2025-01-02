@@ -37,6 +37,10 @@ def login():
 
 @app.route('/seguimiento_procesos_judiciales')
 def seguimiento():
+    #para futuras ocasiones investigar lo de session de flask
+    #para verificar el logeo
+    #if 'correo' not in session:  # Verifica si el usuario no está autenticado
+    #    return redirect(url_for('login'))  # Redirige al login si no está autenticado
     return render_template('seguimiento_procesos_judiciales.html')
 
 
@@ -263,10 +267,14 @@ def correo_login():
                 """)
                 connection.execute(insert_query, {"correo": mail_username, "fecha_hora_ingreso": fecha_hora_ingreso})
                 connection.commit()
+                # Guardar sesión del usuario (o generar un token)
+                #session['correo'] = mail_username  # Guardar en sesión
+ 
                 # Credenciales válidas
                 #return jsonify({'success': True, 'mensaje': 'Inicio de sesión exitoso.'})
                 # Login exitoso, redirige al dashboard
-                return redirect(url_for('seguimiento'))  # Redirige a la ruta del seguimiento
+                # Enviar respuesta JSON con éxito y la URL de redirección
+                return jsonify({'success': True, 'redirect_url': '/seguimiento_procesos_judiciales'})
 
             else:
                 # Credenciales inválidas

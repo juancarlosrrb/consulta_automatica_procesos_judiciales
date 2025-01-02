@@ -191,9 +191,8 @@ async function correo_login(event1) {
         const data = await respuesta.json();
 
         if (data.success) {
-            // Almacenar el correo en sessionStorage para identificar al usuario
-            sessionStorage.setItem("correo", correo);
-
+            // Guardar el correo en localStorage
+            localStorage.setItem("correo", correo);
             console.log(data)
             console.log(correo)
             // Redirigir al dashboard
