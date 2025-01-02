@@ -60,6 +60,8 @@ engine = create_engine(DATABASE_URL)
 table_name_credentials = "2credentials_db"
 table_name_tokens = "1token"
 table_name_ingreso_plataforma = "5ingreso_plataforma"
+table_name_procesos_por_cliente = "3procesos_por_cliente"
+table_name_radicados_diaria = "4consulta_n_radicados"
 #def verificar_correo(mail_username):
 #    
 #    if os.path.exists(path_df_credentials):

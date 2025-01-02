@@ -23,7 +23,7 @@
 <body class = "seguimiento_page">
 
 
-    <script src="js/jquery-3.7.1.min.js"></script>
+    <script src="{{ url_for('static', filename='js/jquery-3.7.1.min.js') }}"></script>
 
 		<header>
 		  <nav id="header-nav" class="navbar navbar-default">
@@ -136,7 +136,7 @@
   <script src="js/jquery-3.7.1.min.js"></script>
   <script src="js/bootstrap.min.js"></script>
   <script src="js/script_dashboard.js"></script>
-  
+
 	  jQuery (Bootstrap JS plugins depend on it) -->
 
   <script src="{{ url_for('static', filename='js/jquery-3.7.1.min.js') }}"></script>

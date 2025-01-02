@@ -1,3 +1,9 @@
+//1. Registro
+const base_url = 'https://3197-2803-f890-102-299-6c64-633f-eba6-eb04.ngrok-free.app'
+//const base_url = window.location.hostname === 'localhost' 
+    //? 'http://127.0.0.1:5000'  // Puerto local
+    //: 'https://consulta-automatica-procesos-judiciales.onrender.com';  // URL de producción
+
 //verificar que se ha iniciado sesión y si no reenviar a home page
 document.addEventListener("DOMContentLoaded", function () {
     verificacion_logeo(); // Llama la función automáticamente al cargar la página
@@ -14,7 +20,7 @@ function verificacion_logeo() {
 	    if (!correo) {
 	        // Si no hay un correo almacenado, redirigir a la página de login
 	        alert("Por favor, inicia sesión primero.");
-	        window.location.href = "login.html";
+	        window.location.href = "login";
             //<a href="{{ url_for('login') }}">
 
 	    } 
@@ -41,7 +47,7 @@ async function agregar_numero_radicado() {
     }
 
     try {
-        const response = await fetch("http://127.0.0.1:5000/agregar_proceso", {
+        const response = await fetch(`${base_url}/agregar_proceso`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -79,7 +85,8 @@ async function agregar_numero_radicado() {
     }
 
     try {
-        const response = await fetch("http://127.0.0.1:5000/agregar_proceso", {
+        const response = await fetch(`${base_url}/agregar_proceso`, {
+
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -118,7 +125,7 @@ async function eliminar_numero_radicado() {
     }
 
     try {
-        const response = await fetch("http://127.0.0.1:5000/eliminar_proceso", {
+        const response = await fetch(`${base_url}/eliminar_proceso`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -152,7 +159,7 @@ async function buscar_n_radicado() {
     const mensaje = document.getElementById("mensaje_agregar");
 
     try {
-        const response = await fetch('http://127.0.0.1:5000/buscar_proceso', {
+        const response = await fetch(`${base_url}/buscar_proceso`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -187,7 +194,8 @@ async function mostrar_procesos_judiciales_del_cliente() {
     const correo = sessionStorage.getItem('correo');
 
     try {
-        const response = await fetch(`http://127.0.0.1:5000/listar_procesos?correo=${correo}`);
+        const response = await fetch(`${base_url}/listar_procesos?correo=${correo}`, {
+
         const result = await response.json();
 
         if (result.success) {
