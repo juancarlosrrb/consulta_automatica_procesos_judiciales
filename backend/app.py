@@ -285,10 +285,12 @@ def correo_login():
                 # Login exitoso, redirige al dashboard
                 # Enviar respuesta JSON con éxito y la URL de redirección
                 # Supongamos que la autenticación es exitosa
-                base_url = "http://localhost:3000/frontend/site/template"
-                redirect_url = f"{base_url}/seguimiento_procesos_judiciales.html"
-                return jsonify({'success': True, 'redirect_url': redirect_url})
-                #return jsonify({'success': True, 'redirect_url': '/seguimiento_procesos_judiciales'})
+                #local:
+                #base_url = "http://localhost:3000/frontend/site/template"
+                #redirect_url = f"{base_url}/seguimiento_procesos_judiciales.html"
+                #return jsonify({'success': True, 'redirect_url': redirect_url})
+                #servidor:
+                return jsonify({'success': True, 'redirect_url': '/seguimiento_procesos_judiciales'})
 
             else:
                 # Credenciales inválidas
