@@ -216,7 +216,7 @@ async function generar_reporte_excel() {
 
         const correo = localStorage.getItem("correo");
 
-        const response = await fetch('http://127.0.0.1:5000/generar_reporte', {
+        const response = await fetch(`${base_url}/generar_reporte`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ correo: correo })
@@ -273,8 +273,7 @@ async function cargar_varios_procesos() {
     try {
         // Mostrar el mensaje de carga
         mensajeEstado.textContent = "Cargando el archivo...";
-
-        const response = await fetch('http://127.0.0.1:5000/cargar_varios_procesos', {
+        const response = await fetch(`${base_url}/cargar_varios_procesos`, {
             method: 'POST',
             body: formData
         });
