@@ -19,13 +19,19 @@ from io import BytesIO
 import sqlalchemy 
 from sqlalchemy import create_engine, Table, Column, MetaData, String, text
 import psycopg2
+from flask import jsonify, request, send_file
+from io import BytesIO
+import calendar
+import openpyxl
 
 app = Flask(__name__, 
             static_folder='../frontend/site/static',  # Configura la carpeta estática
             template_folder='../frontend/site/template')
 
 # Habilita CORS para todas las rutas
-CORS(app)
+#CORS(app)
+# Configuración de CORS: permitir solicitudes de tu frontend
+#CORS(app, resources={r"/listar_procesos": {"origins": "http://localhost:3000"}})
 
 @app.route('/')
 def index():
@@ -61,7 +67,9 @@ table_name_credentials = "2credentials_db"
 table_name_tokens = "1token"
 table_name_ingreso_plataforma = "5ingreso_plataforma"
 table_name_procesos_por_cliente = "3procesos_por_cliente"
-table_name_radicados_diaria = "4consulta_n_radicados"
+table_name_info_n_radicados = "4consulta_n_radicados"
+table_name_consulta_diaria = "6consulta_rama_judicial_diaria"
+
 #def verificar_correo(mail_username):
 #    
 #    if os.path.exists(path_df_credentials):
@@ -276,7 +284,11 @@ def correo_login():
                 #return jsonify({'success': True, 'mensaje': 'Inicio de sesión exitoso.'})
                 # Login exitoso, redirige al dashboard
                 # Enviar respuesta JSON con éxito y la URL de redirección
-                return jsonify({'success': True, 'redirect_url': '/seguimiento_procesos_judiciales'})
+                # Supongamos que la autenticación es exitosa
+                base_url = "http://localhost:3000/frontend/site/template"
+                redirect_url = f"{base_url}/seguimiento_procesos_judiciales.html"
+                return jsonify({'success': True, 'redirect_url': redirect_url})
+                #return jsonify({'success': True, 'redirect_url': '/seguimiento_procesos_judiciales'})
 
             else:
                 # Credenciales inválidas
@@ -289,7 +301,7 @@ def correo_login():
 @app.route('/agregar_proceso', methods=['POST'])
 def agregar_proceso():
     """
-    Endpoint para agregar un proceso por cliente usando un archivo de texto.
+    Endpoint para agregar un proceso por cliente usando base de datos con SQLAlchemy y engine.
     """
     data = request.json
     correo = data.get("correo")
@@ -300,28 +312,38 @@ def agregar_proceso():
     
     if not len(numero_de_radicado) == 23:
         return jsonify({"success": False, "message": "El número de radicado debe tener 23 dígitos."})
-    
-    # Verificar si el archivo existe y leer su contenido
-    registros_existentes = set()
-    if os.path.exists(path_archivo_procesos_por_cliente):
-        with open(path_archivo_procesos_por_cliente , "r") as archivo:
-            registros_existentes = {line.strip() for line in archivo if line.strip()}
-    
-    # Formatear el registro como "correo|numero_de_radicado"
-    nuevo_registro = f"{correo}|{numero_de_radicado}"
-    
-    if nuevo_registro in registros_existentes:
-        return jsonify({"success": False, "message": f"El proceso con el número de radicado {numero_de_radicado} ya está registrado para el correo {correo}."})
-    else:
-        # Agregar el nuevo registro al archivo
-        with open(path_archivo_procesos_por_cliente, "a") as archivo:
-            archivo.write(nuevo_registro + "\n")
+
+    try:
+        # Crear una nueva sesión
+        with engine.connect() as conn:
+            # Verificar si el proceso ya está registrado en la base de datos
+            query = text(f"""SELECT 1 
+                         FROM "{table_name_procesos_por_cliente}" 
+                         WHERE correo = :correo AND numero_de_radicado = :numero_de_radicado""")
+            result = conn.execute(query, {'correo': correo, 'numero_de_radicado': numero_de_radicado}).fetchone()
+
+            if result:
+                return jsonify({"success": False, "message": f"El proceso con el número de radicado {numero_de_radicado} ya está registrado para el correo {correo}."})
+
+            # Insertar el nuevo proceso en la base de datos
+            insert_query = text(f"""INSERT INTO "{table_name_procesos_por_cliente}" (correo, numero_de_radicado) 
+            VALUES (:correo, :numero_de_radicado)
+            """)
+            conn.execute(insert_query, {'correo': correo, 'numero_de_radicado': numero_de_radicado})
+
+            # Confirmar los cambios con commit
+            conn.commit()
+
         return jsonify({"success": True, "message": f"El proceso con el número de radicado {numero_de_radicado} ha sido AGREGADO exitosamente para el correo {correo}."})
+
+    except Exception as e:
+        # En caso de error al interactuar con la base de datos
+        return jsonify({"success": False, "message": f"Hubo un error al agregar el proceso: {str(e)}"})
 
 @app.route('/eliminar_proceso', methods=['POST'])
 def eliminar_proceso():
     """
-    Endpoint para eliminar un número de radicado asociado a un correo en el archivo de texto.
+    Endpoint para eliminar un número de radicado asociado a un correo en la base de datos.
     """
     data = request.json
     correo = data.get("correo")
@@ -330,36 +352,39 @@ def eliminar_proceso():
     if not correo or not numero_de_radicado:
         return jsonify({"success": False, "message": "Correo y número de radicado son obligatorios."})
 
-    # Leer los registros existentes
-    if not os.path.exists(path_archivo_procesos_por_cliente ):
-        return jsonify({"success": False, "message": "El archivo no existe, no hay registros para eliminar."})
+    try:
+        # Crear una nueva sesión
+        with engine.connect() as conn:
+            # Verificar si el proceso existe en la base de datos
+            query = text(f"""SELECT 1 
+                         FROM "{table_name_procesos_por_cliente}" 
+                WHERE correo = :correo AND numero_de_radicado = :numero_de_radicado
+            """)
+            result = conn.execute(query, {'correo': correo, 'numero_de_radicado': numero_de_radicado}).fetchone()
 
-    registros_actualizados = []
-    registro_eliminado = False
+            if not result:
+                return jsonify({"success": False, "message": f"No se encontró el proceso con el número de radicado {numero_de_radicado} para el correo {correo}."})
 
-    with open(path_archivo_procesos_por_cliente, "r") as archivo:
-        for line in archivo:
-            registro = line.strip()
-            if registro == f"{correo}|{numero_de_radicado}":
-                registro_eliminado = True
-            else:
-                registros_actualizados.append(registro)
+            # Eliminar el proceso de la base de datos
+            delete_query = text(f"""DELETE FROM "{table_name_procesos_por_cliente}"
+                WHERE correo = :correo AND numero_de_radicado = :numero_de_radicado
+            """)
+            conn.execute(delete_query, {'correo': correo, 'numero_de_radicado': numero_de_radicado})
 
-    # Si no se encontró el registro, devolver un mensaje de error
-    if not registro_eliminado:
-        return jsonify({"success": False, "message": f"No se encontró el proceso con el número de radicado {numero_de_radicado} para el correo {correo}."})
+            # Confirmar los cambios con commit
+            conn.commit()
 
-    # Escribir los registros actualizados al archivo
-    with open(path_archivo_procesos_por_cliente, "w") as archivo:
-        for registro in registros_actualizados:
-            archivo.write(registro + "\n")
+        return jsonify({"success": True, "message": f"El proceso con el número de radicado {numero_de_radicado} ha sido ELIMINADO exitosamente para el correo {correo}."})
 
-    return jsonify({"success": True, "message": f"El proceso con el número de radicado {numero_de_radicado} ha sido ELIMINADO exitosamente para el correo {correo}."})
+    except Exception as e:
+        # En caso de error al interactuar con la base de datos
+        return jsonify({"success": False, "message": f"Hubo un error al eliminar el proceso: {str(e)}"})
+
 
 @app.route('/buscar_proceso', methods=['POST'])
 def buscar_proceso():
     """
-    Endpoint para buscar un número de radicado asociado a un correo en el archivo de texto.
+    Endpoint para buscar un número de radicado asociado a un correo en la base de datos.
     """
     data = request.json
     correo = data.get("correo")
@@ -368,92 +393,149 @@ def buscar_proceso():
     if not correo or not numero_de_radicado:
         return jsonify({"success": False, "message": "Correo y número de radicado son obligatorios."})
 
-    # Leer los registros existentes
-    if not os.path.exists(path_archivo_procesos_por_cliente):
-        return jsonify({"success": False, "message": "El archivo no existe, no se puede realizar la búsqueda."})
+    try:
+        # Crear una nueva sesión
+        with engine.connect() as conn:
+            # Verificar si el proceso existe en la base de datos
+            query = text(f"""SELECT 1 FROM "{table_name_procesos_por_cliente}"
+                WHERE correo = :correo AND numero_de_radicado = :numero_de_radicado
+            """)
+            result = conn.execute(query, {'correo': correo, 'numero_de_radicado': numero_de_radicado}).fetchone()
 
-    with open(path_archivo_procesos_por_cliente, "r") as archivo:
-        for line in archivo:
-            registro = line.strip()
-            if registro == f"{correo}|{numero_de_radicado}":
+            if result:
                 return jsonify({"success": True, "message": f"ENCONTRADO: El número de radicado {numero_de_radicado} ya está en la base de datos para el correo {correo}."})
+            else:
+                return jsonify({"success": False, "message": f"NO EXISTE: El número de radicado {numero_de_radicado} no está registrado para el correo {correo}."})
 
-    return jsonify({"success": False, "message": f"NO EXISTE: El número de radicado {numero_de_radicado} no está registrado para el correo {correo}."})
+    except Exception as e:
+        # En caso de error al interactuar con la base de datos
+        return jsonify({"success": False, "message": f"Hubo un error al buscar el proceso: {str(e)}"})
 
 @app.route('/listar_procesos', methods=['GET'])
 def listar_procesos():
     """
-    Endpoint para listar los procesos asociados a un correo en el archivo de texto.
+    Endpoint para listar los procesos asociados a un correo en la base de datos PostgreSQL.
     """
+    #print("entro a listar procesos")
     correo = request.args.get('correo')  # Obtener el correo desde los parámetros de la URL
 
+    #print(correo)
     if not correo:
         return jsonify({"success": False, "message": "Correo es obligatorio."})
 
+    try:
+        with engine.connect() as connection:
+            query = text(f"""
+                SELECT numero_de_radicado 
+                FROM "{table_name_procesos_por_cliente}"
+                WHERE correo = :correo
+            """)
+            #print(query)
+            result = connection.execute(query, {"correo": correo}).fetchall()
 
-    if not os.path.exists(path_archivo_procesos_por_cliente):
-        return jsonify({"success": False, "message": "El archivo no existe."})
+            procesos = [row[0] for row in result]
 
-    procesos = []
-    with open(path_archivo_procesos_por_cliente, "r") as archivo:
-        for line in archivo:
-            registro = line.strip()
-            registro_correo, numero_de_radicado = registro.split('|')
-            if registro_correo == correo:
-                procesos.append(numero_de_radicado)
+            if not procesos:
+                return jsonify({"success": False, "message": "No hay procesos asociados a este correo."})
 
-    if not procesos:
-        return jsonify({"success": False, "message": "No hay procesos asociados a este correo."})
+        #jsonify({"success": True, "procesos": "ya_casi"})#
+        return jsonify({"success": True, "procesos": procesos})
 
-    print(procesos)
-    return jsonify({"success": True, "procesos": procesos})
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Error: {str(e)}"})
 
 
 @app.route('/generar_reporte', methods=['POST'])
 def generar_reporte():
+    """
+    Endpoint para generar un reporte en Excel con múltiples pestañas derivadas de una única consulta SQL.
+    """
     data = request.json
     correo = data.get("correo")
-    
+
+    if not correo:
+        return jsonify({"success": False, "message": "Correo es obligatorio."})
+
     try:
-        ruta_rscript_exe = "C:/Program Files/R/R-4.4.2/bin/Rscript.exe" 
-        # Ruta del script de R
-        script_path = "C:/Users/USUARIO/Juan Carlos/Software San Francisco de Asis/software_consulta/SENA_informe_consulta_de_procesos.R"
-        
-        # Ejecutar el script R
-        print("Ejecutando script R...")
-        result = subprocess.run(
-            [ruta_rscript_exe, script_path],  # Llama al ejecutable Rscript
-            capture_output=True,
-            text=True
-        )
-        
-        # Log de salida y errores
-        #print("Salida del script R:", result.stdout)
-        #print("Errores del script R:", result.stderr)
+        # Ejecutar consulta SQL para obtener todos los datos necesarios
+        with engine.connect() as conn:
+            query = text(f"""SELECT 
+                    pc.correo, 
+                    pc.numero_de_radicado, 
+                    sfa.fecha_ult_actuacion, 
+                    info_radicados.ciudad, 
+                    info_radicados.entidad_o_especialidad
+                FROM public."{table_name_procesos_por_cliente}" pc
+                LEFT JOIN public."{table_name_consulta_diaria}" sfa
+                    ON pc.numero_de_radicado = sfa.numero_de_radicado
+                LEFT JOIN public."{table_name_info_n_radicados}" info_radicados
+                    ON pc.numero_de_radicado = info_radicados.numero_de_radicado
+                WHERE pc.correo = :correo
+            """)
+            df = pd.read_sql(query, conn, params={"correo": correo})
 
-        # Verificar si el script se ejecutó correctamente
-        if result.returncode != 0:
-            return jsonify({"success": False, "message": "Error al ejecutar el script: " + result.stderr})
-        
-        # Construir la ruta del archivo generado por el script
-        path_archivo_excel = f"C:/Users/USUARIO/Juan Carlos/Software San Francisco de Asis/pagina_web/consulta_automatica_procesos_judiciales/back_end/data_base/resultados/consulta_procesos_{correo}.xlsx"
-        
-        # Verificar si el archivo se generó
-        if not os.path.exists(path_archivo_excel):
-            return jsonify({"success": False, "message": "El archivo Excel no se generó."})
+        # Convertir fecha_ult_actuacion al formato datetime
+        df["fecha_ult_actuacion"] = pd.to_datetime(df["fecha_ult_actuacion"], errors="coerce", format="%d %b %Y")
 
-        # Leer el archivo Excel en memoria
+        # Crear las hojas del reporte
+        total_procesos_SOLICITADOS = df[["correo", "numero_de_radicado"]].drop_duplicates()
+        total_procesos_buscados = df.dropna(subset=["fecha_ult_actuacion"])
+        procesos_NO_BUSCADOS = df[df["fecha_ult_actuacion"].isna()]
+        procesos_no_encontrados = df[df["fecha_ult_actuacion"] == "no_encontro_informacion"]
+        procesos_SI_encontrados = df[
+            (df["fecha_ult_actuacion"].notna()) & 
+            (df["fecha_ult_actuacion"] != "no_encontro_informacion")]
+        procesos_con_actuacion_este_mes = total_procesos_buscados[
+            total_procesos_buscados["fecha_ult_actuacion"] >= datetime.now().replace(day=1)
+        ]
+        procesos_actuacion_esta_semana = total_procesos_buscados[
+            total_procesos_buscados["fecha_ult_actuacion"] >= datetime.now() - pd.Timedelta(days=datetime.now().weekday())
+        ]
+
+        # Garantizar columnas si los DataFrames están vacíos
+        columnas = {
+            "total_procesos_SOLICITADOS": ["correo", "numero_de_radicado"],
+            "total_procesos_buscados": df.columns.tolist(),
+            "procesos_NO_BUSCADOS": df.columns.tolist(),
+            "procesos_no_encontrados": df.columns.tolist(),
+            "procesos_SI_encontrados": df.columns.tolist(),
+            "procesos_con_actuacion_este_mes": df.columns.tolist(),
+            "procesos_actuacion_esta_semana": df.columns.tolist(),
+        }
+        # Diccionario con los DataFrames por hoja
+        hojas = {
+            nombre: df_hoja if not df_hoja.empty else pd.DataFrame(columns=columnas[nombre])
+            for nombre, df_hoja in {
+                "total_procesos_SOLICITADOS": total_procesos_SOLICITADOS,
+                "total_procesos_buscados": total_procesos_buscados,
+                "procesos_NO_BUSCADOS": procesos_NO_BUSCADOS,
+                "procesos_no_encontrados": procesos_no_encontrados,
+                "procesos_SI_encontrados": procesos_SI_encontrados,
+                "procesos_con_actuacion_este_mes": procesos_con_actuacion_este_mes,
+                "procesos_actuacion_esta_semana": procesos_actuacion_esta_semana,
+            }.items()
+        }
+        # Crear el archivo Excel
         output = BytesIO()
-        with open(path_archivo_excel, "rb") as f:
-            output.write(f.read())
-            contenido = f.read()
-        
+        #with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        #    for sheet_name, df_hoja in hojas.items():
+        #        df_hoja.to_excel(writer, index=False, sheet_name=sheet_name)
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            for sheet_name, df_hoja in hojas.items():
+                # Escribir el DataFrame en la hoja
+                df_hoja.to_excel(writer, index=False, sheet_name=sheet_name)
+                
+                # Ajustar automáticamente el ancho de las columnas
+                worksheet = writer.sheets[sheet_name]
+                for col_idx, column in enumerate(df_hoja.columns, start=1):
+                    max_length = max(
+                        df_hoja[column].astype(str).map(len).max(),  # Longitud máxima del contenido
+                        len(column)  # Longitud del nombre de la columna
+                    )
+                    worksheet.column_dimensions[openpyxl.utils.get_column_letter(col_idx)].width = max_length + 2
+
         output.seek(0)
-        
-        # Verificar el tamaño del archivo cargado
-        print("Tamaño del archivo original:", os.path.getsize(path_archivo_excel))
-        print("Tamaño del archivo cargado en BytesIO:", len(contenido))
-        
+
         # Enviar el archivo Excel como respuesta
         return send_file(
             output,
@@ -461,67 +543,9 @@ def generar_reporte():
             as_attachment=True,
             download_name=f"reporte_generado_{correo}.xlsx"
         )
-    
-    except Exception as e:
-        return jsonify({"success": False, "message": str(e)})
-
-
-
-@app.route('/cargar_varios_procesos', methods=['POST'])
-def cargar_varios_procesos():
-    try:
-        # Obtener el archivo cargado y el correo asociado
-        archivo = request.files['archivo']
-        correo = request.form.get('correo')  # Obtener correo del formulario
-
-        # Leer el contenido del archivo .txt
-        contenido = archivo.read().decode('utf-8').splitlines()
-
-        # Crear el DataFrame para leer los procesos existentes si ya existe el archivo
-        # Leer el archivo existente en un DataFrame
-        df = pd.read_csv(path_archivo_procesos_por_cliente, sep="|", header=None, names=["correo", "numero_de_radicado"])
-
-        # Crear un conjunto con los radicados ya existentes
-        radicados_existentes = set(df['numero_de_radicado'].values)
-
-        # Procesar cada radicado en el archivo cargado
-        new_entries = []
-        for radicado in contenido:
-            # Verificar si el radicado tiene 20 dígitos y es numérico
-            if len(radicado) == 23 and radicado.isdigit():
-                # Verificar si el radicado ya existe para ese correo
-                if radicado not in radicados_existentes:
-                    new_entries.append([correo, radicado])
-                    radicados_existentes.add(radicado)  # Agregar a los radicados existentes
-            else:
-                print(f"Radicado inválido: {radicado}")
-
-        # Si hay nuevos radicados, agregarlo al DataFrame
-        if new_entries:
-            new_df = pd.DataFrame(new_entries, columns=["correo", "numero_de_radicado"])
-            df = pd.concat([df, new_df], ignore_index=True)
-
-            # Guardar el DataFrame actualizado en el archivo de texto
-            df.to_csv(path_archivo_procesos_por_cliente, sep="|", header=False, index=False)
-
-        return jsonify({"success": True, "message": "Procesos cargados correctamente."})
 
     except Exception as e:
-        return jsonify({"success": False, "message": str(e)})
-    
-@app.route('/upload_file_scraping', methods=['POST'])
-def upload_file_scraping():
-    if 'file' not in request.files:
-        return 'No file part', 400
-    file = request.files['file']
-    if file.filename == '':
-        return 'No selected file', 400
-
-    # Ruta personalizada para guardar el archivo
-    save_path = r"C:\Users\USUARIO\Juan Carlos\Software San Francisco de Asis\pagina_web\consulta_automatica_procesos_judiciales\back_end\data_base\6consulta_rama_judicial_diaria.txt"
-    file.save(save_path)  # Guarda el archivo en la ruta especificada
-    return 'File uploaded successfully', 200
-
+        return jsonify({"success": False, "message": f"Error al generar el reporte: {str(e)}"})
 
 if __name__ == "__main__":
     app.run(debug=False)

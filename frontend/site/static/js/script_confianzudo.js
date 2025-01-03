@@ -1,8 +1,9 @@
 //comunicación front y backend
 
 //1. Registro
-const base_url = 'https://3197-2803-f890-102-299-6c64-633f-eba6-eb04.ngrok-free.app'
-//const base_url = window.location.hostname === 'localhost' 
+const base_url = 'https://consulta-automatica-procesos-judiciales.onrender.com';
+    //base_url = 'https://3197-2803-f890-102-299-6c64-633f-eba6-eb04.ngrok-free.app'
+    //const base_url = window.location.hostname === 'localhost' 
     //? 'http://127.0.0.1:5000'  // Puerto local
     //: 'https://consulta-automatica-procesos-judiciales.onrender.com';  // URL de producción
 
@@ -197,7 +198,12 @@ async function correo_login(event1) {
             console.log(correo)
             // Redirigir al dashboard
             // Redirigir usando la URL proporcionada por el backend
+            //servidor:
             window.location.href = data.redirect_url;
+            //local:
+            //console.log("frontend/site/template" + data.redirect_url + ".html")
+            //window.location.href = "frontend/site/template" + data.redirect_url + ".html";
+
         } else {
             alert(data.mensaje); // Mostrar mensaje de error
         }

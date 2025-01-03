@@ -1,6 +1,7 @@
 //1. Registro
-const base_url = 'https://3197-2803-f890-102-299-6c64-633f-eba6-eb04.ngrok-free.app'
-//const base_url = window.location.hostname === 'localhost' 
+const base_url = 'https://consulta-automatica-procesos-judiciales.onrender.com'; 
+    //'https://3197-2803-f890-102-299-6c64-633f-eba6-eb04.ngrok-free.app';
+    //const base_url = window.location.hostname === 'localhost' 
     //? 'http://127.0.0.1:5000'  // Puerto local
     //: 'https://consulta-automatica-procesos-judiciales.onrender.com';  // URL de producción
 
@@ -8,6 +9,7 @@ const base_url = 'https://3197-2803-f890-102-299-6c64-633f-eba6-eb04.ngrok-free.
 document.addEventListener("DOMContentLoaded", function () {
     verificacion_logeo(); // Llama la función automáticamente al cargar la página
     mostrar_procesos_judiciales_del_cliente(); //carga los procesos judiciales del cliente
+     
 });
 
 function verificacion_logeo() {
@@ -29,18 +31,19 @@ function verificacion_logeo() {
 
 function cerrarSesion() {
     // Limpia el sessionStorage y redirige al login
-    sessionStorage.clear();
+    localStorage.clear();
     window.location.href = "login.html";
 }
 
 // Función para agregar un proceso
 async function agregar_numero_radicado() {
-	const correo = sessionStorage.getItem("correo");
+	const correo = localStorage.getItem("correo");
     const numeroDeRadicado = document.getElementById("numero_radicado").value;
     const mensaje = document.getElementById("mensaje_agregar");
 
     // Validación básica de campos
     if (!correo || !numeroDeRadicado) {
+        mensaje.innerText = "";
         mensaje.innerText = "Por favor, completa todos los campos.";
         mensaje.style.color = "red";
         return;
@@ -48,45 +51,6 @@ async function agregar_numero_radicado() {
 
     try {
         const response = await fetch(`${base_url}/agregar_proceso`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ correo: correo, numero_de_radicado: numeroDeRadicado }),
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-            mensaje.innerText = data.message;
-            mensaje.style.color = "green";
-        } else {
-            mensaje.innerText = data.message;
-            mensaje.style.color = "red";
-        }
-    } catch (error) {
-        mensaje.innerText = "Hubo un error al procesar la solicitud.";
-        mensaje.style.color = "red";
-        //console.error("Error:", error);
-    }
-}
-
-// Función para agregar un proceso
-async function agregar_numero_radicado() {
-	const correo = sessionStorage.getItem("correo");
-    const numeroDeRadicado = document.getElementById("numero_radicado").value;
-    const mensaje = document.getElementById("mensaje_agregar");
-
-    // Validación básica de campos
-    if (!correo || !numeroDeRadicado) {
-        mensaje.innerText = "Por favor, completa todos los campos.";
-        mensaje.style.color = "red";
-        return;
-    }
-
-    try {
-        const response = await fetch(`${base_url}/agregar_proceso`, {
-
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -113,7 +77,7 @@ async function agregar_numero_radicado() {
 
 // Función para eliminar un proceso
 async function eliminar_numero_radicado() {
-	const correo = sessionStorage.getItem("correo");
+	const correo = localStorage.getItem("correo");
     const numeroDeRadicado = document.getElementById("numero_radicado").value;
     const mensaje = document.getElementById("mensaje_agregar");
 
@@ -154,7 +118,7 @@ async function eliminar_numero_radicado() {
 
 async function buscar_n_radicado() {
 
-	const correo = sessionStorage.getItem("correo");
+	const correo = localStorage.getItem("correo");
     const numeroDeRadicado = document.getElementById("numero_radicado").value;
     const mensaje = document.getElementById("mensaje_agregar");
 
@@ -191,10 +155,16 @@ async function buscar_n_radicado() {
 //mostrar procesos judiciales del coreo
 async function mostrar_procesos_judiciales_del_cliente() {
     // Obtener el correo desde sessionStorage
-    const correo = sessionStorage.getItem('correo');
+    const correo = localStorage.getItem('correo');
 
     try {
-        const response = await fetch(`${base_url}/listar_procesos?correo=${correo}`, {
+        const response = await fetch(`${base_url}/listar_procesos?correo=${correo}`);
+
+        // Verificar si la respuesta es exitosa
+        if (!response.ok) {
+            throw new Error(`Error en la solicitud: ${response.statusText}`);
+        }
+
 
         const result = await response.json();
 
@@ -224,6 +194,7 @@ async function mostrar_procesos_judiciales_del_cliente() {
             alert(result.message);
         }
     } catch (error) {
+        console.log("esta entrando en el error")
         //console.error('Error al obtener los procesos:', error);
     }
 };
@@ -243,7 +214,7 @@ async function generar_reporte_excel() {
         botonDescarga.disabled = true;
         mensajeEstado.textContent = "Generando el archivo. Por favor, espera...";
 
-        const correo = sessionStorage.getItem("correo");
+        const correo = localStorage.getItem("correo");
 
         const response = await fetch('http://127.0.0.1:5000/generar_reporte', {
             method: 'POST',
@@ -286,7 +257,7 @@ async function cargar_varios_procesos() {
         return;
     }
 
-    const correo = sessionStorage.getItem("correo"); // Obtener el correo desde sessionStorage
+    const correo = localStorage.getItem("correo"); // Obtener el correo desde sessionStorage
 
     // Verificar que el correo existe
     if (!correo) {

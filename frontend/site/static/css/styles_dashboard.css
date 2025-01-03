@@ -29,3 +29,8 @@
   text-align: justify; /* Opcional: Alinear el texto de forma justificada */
 }
 
+.custom-width-izquierda {
+  max-width: 450px; /* Ajusta el ancho máximo de la sección */
+  word-wrap: break-word; /* Ajusta el texto para que no desborde */
+  white-space: normal; /* Permite que el texto ocupe varias líneas */
+}
